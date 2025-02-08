@@ -2,11 +2,11 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
+
+	pokeapi "github.com/KrishKoria/PokeApi"
 )
 
 var commands map[string]cliCommand
@@ -22,14 +22,7 @@ type config struct {
 	Previous string
 }
 
-type locationResponse struct {
-	Results []struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	} `json:"results"`
-	Next string `json:"next"`
-	Previous string `json:"previous"`
-}
+
 
 func main() {
 	cfg := &config{
@@ -108,13 +101,8 @@ func commandMap(cfg *config) error {
 	if cfg.Next == "" {
 		return fmt.Errorf("no more locations to display")
 	}
-	res, err := http.Get(cfg.Next)
+	loc, err := pokeapi.FetchLocations(cfg.Next)
 	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-	var loc locationResponse
-	if err := json.NewDecoder(res.Body).Decode(&loc); err != nil {
 		return err
 	}
 	for _, loc := range loc.Results {
@@ -129,13 +117,8 @@ func commandMapb(cfg *config) error {
 	if cfg.Previous == "" {
 		return fmt.Errorf("no more locations to display")
 	}
-	res, err := http.Get(cfg.Previous)
+	loc, err := pokeapi.FetchLocations(cfg.Previous)
 	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-	var loc locationResponse
-	if err := json.NewDecoder(res.Body).Decode(&loc); err != nil {
 		return err
 	}
 	for _, loc := range loc.Results {
