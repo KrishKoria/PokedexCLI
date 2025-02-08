@@ -14,7 +14,7 @@ var commands map[string]cliCommand
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, []string) error
 }
 
 type config struct {
@@ -50,6 +50,11 @@ func main() {
 			description: "Displays the previous map",
 			callback:    commandMapb,
 		},
+		"explore" : {
+			name: "explore",
+			description: "Explore the map",
+			callback: commandExplore,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -63,7 +68,7 @@ func main() {
 		words := cleanInput(text)
 		if len(words) > 0 {
 			if command, ok := commands[words[0]]; ok {
-				err := command.callback(cfg)
+				err := command.callback(cfg, words[1:])
 				if err != nil {
 					fmt.Println("Error executing command:", err)
 				}
@@ -82,22 +87,22 @@ func cleanInput(text string) []string {
 	return words
 }
 
-func commandExit(cfg *config) error {
+func commandExit(cfg *config, args []string) error {
     fmt.Println("Closing the Pokedex... Goodbye!")
     os.Exit(0)
     return nil
 }
 
-func commandHelp(cfg *config) error {
+func commandHelp(cfg *config, args []string) error {
     fmt.Println("Welcome to the Pokedex!")
-    fmt.Print("Usage: \n\n\n\n")
+    fmt.Print("Usage: \n\n")
     for _, cmd := range commands {
         fmt.Printf("%s: %s\n", cmd.name, cmd.description)
     }
     return nil
 }
 
-func commandMap(cfg *config) error {
+func commandMap(cfg *config, args []string) error {
 	if cfg.Next == "" {
 		return fmt.Errorf("no more locations to display")
 	}
@@ -113,7 +118,7 @@ func commandMap(cfg *config) error {
 	return nil
 }
 
-func commandMapb(cfg *config) error {
+func commandMapb(cfg *config, args []string) error {
 	if cfg.Previous == "" {
 		return fmt.Errorf("no more locations to display")
 	}
@@ -126,5 +131,15 @@ func commandMapb(cfg *config) error {
 	}
 	cfg.Next = loc.Next
 	cfg.Previous = loc.Previous
+	return nil
+}
+
+func commandExplore(cfg *config, args []string) error {
+	if len(args) == 0 {
+        return fmt.Errorf("please provide a location area name")
+    }
+	locationName := args[0]
+	fmt.Println("Exploring location area:", locationName)
+	// Fetch the location area
 	return nil
 }
