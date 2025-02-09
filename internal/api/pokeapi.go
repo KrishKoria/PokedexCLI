@@ -28,6 +28,10 @@ type LocationArea struct {
 	} `json:"pokemon_encounters"`
 }
 
+type Pokemon struct {
+	Name string `json:"name"`
+	BaseExperience int `json:"base_experience"`
+}
 
 func FetchLocations(url string) (*LocationResponse, error) {
 	if data, ok := locationCache.Get(url); ok {
@@ -84,5 +88,34 @@ func FetchLocationArea(name string) (*LocationArea, error) {
 	locationCache.Add(url, data)
 
     return &locationArea, nil
+}
+
+func FetchPokemon(name string) (*Pokemon, error) {
+	url := "https://pokeapi.co/api/v2/pokemon/" + name
+	if data, ok := locationCache.Get(url); ok {
+        var pokemon Pokemon
+        if err := json.Unmarshal(data, &pokemon); err != nil {
+            return nil, err
+        }
+        return &pokemon, nil
+    }
+
+	res, err := http.Get(url)
+    if err != nil {
+        return nil, err
+    }
+    defer res.Body.Close()
+
+    var pokemon Pokemon
+    if err := json.NewDecoder(res.Body).Decode(&pokemon); err != nil {
+        return nil, err
+    }
+	data, err := json.Marshal(pokemon)
+	if err != nil {
+		return nil, err
+	}
+	locationCache.Add(url, data)
+
+    return &pokemon, nil
 }
 		

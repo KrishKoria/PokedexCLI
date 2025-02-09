@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 
@@ -17,17 +18,20 @@ type cliCommand struct {
 	callback    func(*config, []string) error
 }
 
+
+
 type config struct {
 	Next string
 	Previous string
+	Pokedex map[string]pokeapi.Pokemon
 }
-
 
 
 func main() {
 	cfg := &config{
 		Next: "https://pokeapi.co/api/v2/location-area?offset=0&limit=20",
 		Previous: "",
+		Pokedex: make(map[string]pokeapi.Pokemon),
 	}
 	commands = map[string]cliCommand{
 		"exit": {
@@ -160,7 +164,29 @@ func commandCatch(cfg *config, args []string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("please provide a Pokemon name")
 	}
+
 	pokemonName := args[0]
-	fmt.Printf("Catching %s...\n", pokemonName)
+	pokemon, err := pokeapi.FetchPokemon(pokemonName)
+	if err != nil {
+		return err
+	}
+	
+	fmt.Printf("Throwing a Pokeball at %s...\n", pokemonName)
+	
+	baseExperience := pokemon.BaseExperience
+    catchProbability := 100 - baseExperience/2
+    if catchProbability < 10 {
+        catchProbability = 10 
+    }
+	
+	chance := rand.Intn(100)
+    if chance < catchProbability{
+        fmt.Printf("%s was caught!\n", pokemonName)
+        cfg.Pokedex[pokemonName] = *pokemon
+    } else {
+        fmt.Printf("%s escaped!\n", pokemonName)
+    }
+
 	return nil
 }
+
