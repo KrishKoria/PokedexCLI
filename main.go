@@ -1,13 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/rand"
 	"os"
 	"strings"
 
 	pokeapi "github.com/KrishKoria/PokeApi"
+	"github.com/peterh/liner"
 )
 
 var commands map[string]cliCommand
@@ -75,15 +75,18 @@ func main() {
 			callback: commandPokedex,
 		},
 	}
+	line := liner.NewLiner()
+	defer line.Close()
+	
+	line.SetCtrlCAborts(true)
 
-	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("Welcome to PokedexCLI! Type 'exit' to quit.")
 	for {
-		fmt.Print("PokeDex > ")
-		if !scanner.Scan() {
+		text, err := line.Prompt("PokeDex > ")
+		if err != nil {
             break
         }
-		text := scanner.Text()
+		line.AppendHistory(text)
 		words := cleanInput(text)
 		if len(words) > 0 {
 			if command, ok := commands[words[0]]; ok {
