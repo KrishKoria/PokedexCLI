@@ -64,6 +64,11 @@ func main() {
 			description: "Catch a Pokemon",
 			callback: commandCatch,
 		},
+		"inspect": {
+			name: "inspect",
+			description: "Inspect a Pokemon",
+			callback: commandInspect,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -190,3 +195,29 @@ func commandCatch(cfg *config, args []string) error {
 	return nil
 }
 
+func commandInspect(cfg *config, args []string) error {
+    if len(args) == 0 {
+        return fmt.Errorf("please provide a Pokemon name")
+    }
+
+    pokemonName := args[0]
+    pokemon, ok := cfg.Pokedex[pokemonName]
+    if !ok {
+        fmt.Printf("You have not caught that Pokemon\n")
+        return nil
+    }
+
+    fmt.Printf("Name: %s\n", pokemon.Name)
+    fmt.Printf("Height: %d\n", pokemon.Height)
+    fmt.Printf("Weight: %d\n", pokemon.Weight)
+    fmt.Println("Stats:")
+    for _, stat := range pokemon.Stats {
+        fmt.Printf("  - %s: %d\n", stat.Stat.Name, stat.BaseStat)
+    }
+    fmt.Println("Types:")
+    for _, t := range pokemon.Types {
+        fmt.Printf("  - %s\n", t.Type.Name)
+    }
+
+    return nil
+}
