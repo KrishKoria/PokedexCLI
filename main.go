@@ -55,6 +55,11 @@ func main() {
 			description: "Explore the map",
 			callback: commandExplore,
 		},
+		"catch": {
+			name: "catch",
+			description: "Catch a Pokemon",
+			callback: commandCatch,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -148,5 +153,14 @@ func commandExplore(cfg *config, args []string) error {
 	for _, encounter := range locationArea.PokemonEncounters {
 		fmt.Println(" - " + encounter.Pokemon.Name)
 	}
+	return nil
+}
+
+func commandCatch(cfg *config, args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("please provide a Pokemon name")
+	}
+	pokemonName := args[0]
+	fmt.Printf("Catching %s...\n", pokemonName)
 	return nil
 }
