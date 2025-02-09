@@ -69,6 +69,11 @@ func main() {
 			description: "Inspect a Pokemon",
 			callback: commandInspect,
 		},
+		"pokedex": {
+			name: "pokedex",
+			description: "View your Pokedex",
+			callback: commandPokedex,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -187,6 +192,7 @@ func commandCatch(cfg *config, args []string) error {
 	chance := rand.Intn(100)
     if chance < catchProbability{
         fmt.Printf("%s was caught!\n", pokemonName)
+		fmt.Println("You may now inspect it with the inspect command.")
         cfg.Pokedex[pokemonName] = *pokemon
     } else {
         fmt.Printf("%s escaped!\n", pokemonName)
@@ -219,5 +225,18 @@ func commandInspect(cfg *config, args []string) error {
         fmt.Printf("  - %s\n", t.Type.Name)
     }
 
+    return nil
+}
+
+func commandPokedex(cfg *config, args []string) error {
+    if len(cfg.Pokedex) == 0 {
+        fmt.Println("Your Pokedex is empty.")
+        return nil
+    }
+
+    fmt.Println("Your Pokedex:")
+    for name := range cfg.Pokedex {
+        fmt.Printf(" - %s\n", name)
+    }
     return nil
 }
