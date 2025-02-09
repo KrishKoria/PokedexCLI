@@ -139,7 +139,14 @@ func commandExplore(cfg *config, args []string) error {
         return fmt.Errorf("please provide a location area name")
     }
 	locationName := args[0]
-	fmt.Println("Exploring location area:", locationName)
-	// Fetch the location area
+	locationArea, err := pokeapi.FetchLocationArea(locationName)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Exploring %s...\n", locationName)
+	fmt.Println("Found Pokemon:")
+	for _, encounter := range locationArea.PokemonEncounters {
+		fmt.Println(" - " + encounter.Pokemon.Name)
+	}
 	return nil
 }
